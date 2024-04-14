@@ -4,13 +4,14 @@ import pandas as pd
 def cyclical_encode_dates(df):
     """
     Enhances a DataFrame by converting specified date columns to datetime format and calculating the number
-    of days passed since each date.
+    of days passed since each date. Missing values in the calculated days are replaced with the column mean.
 
     Parameters:
     - df (DataFrame): Input DataFrame with 'first_review', 'host_since', 'last_review' columns.
 
     Returns:
     - DataFrame: Modified DataFrame with new columns showing days passed since each specified date.
+                 Missing values in these new columns are replaced with the mean of each column.
 
     New columns added for each date column include:
     - [column_name]_days_since
@@ -27,6 +28,9 @@ def cyclical_encode_dates(df):
 
     for col in date_columns:
         df[col + '_days_since'] = (current_date - df[col]).dt.days
+        mean_days_since = df[col + '_days_since'].mean()
+
+        df[col + '_days_since'].fillna(mean_days_since, inplace=True)
 
 
     return df
