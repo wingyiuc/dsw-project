@@ -27,6 +27,7 @@ def remove_outliers(df, column_name):
     return df_filtered
 
 def convert_column_types(df):
+    df = df.copy()
     mean_value = df['bedrooms'].mean() # use floorspace to predict bedrooms?
     df['bedrooms'] = df['bedrooms'].fillna(mean_value)
     df['bedrooms'] = df['bedrooms'].astype(int)
@@ -36,6 +37,12 @@ def convert_column_types(df):
     df['beds'] = df['beds'].astype(int)
     
     df['host_response_rate'] = df['host_response_rate'].str.replace('%', '').astype(float)
+    host_response_rate_mean = df['host_response_rate'].mean()
+    df['host_response_rate'].fillna(host_response_rate_mean, inplace=True)
+
+    bathroom_mode = df['bathrooms'].mode().iloc[0]
+    print("mode of bathroom: ", df['bathrooms'].mode().iloc[0])
+    df['bathrooms'].fillna(bathroom_mode, inplace=True)
     
     return df
 
@@ -64,22 +71,29 @@ def process_numerical_columns(df):
     
     # accommodates, bathrooms, bedrooms and beds are skewed
     # they are correlated so removing outliers from one is suffiicent
-    df = remove_outliers(df, 'accommodates')
+    # df = remove_outliers(df, 'accommodates')
 
     # Step 2: Handle missing values (tbc)
     
     
     # Step 3: Normalize
-    df = normalize_left_skewed(df, 'accommodates')
-    df = normalize_left_skewed(df, 'bathrooms')
+    # df = normalize_left_skewed(df, 'accommodates')
+    # df = normalize_left_skewed(df, 'bathrooms')
     df = normalize_right_skewed(df, 'host_response_rate')
-    df = normalize_left_skewed(df, 'number_of_reviews')
+    # df = normalize_left_skewed(df, 'number_of_reviews')
     df = normalize_right_skewed(df, 'review_scores_rating')
-    df = normalize_left_skewed(df, 'bedrooms')
-    df = normalize_left_skewed(df, 'beds')
+    df['normalized_rating'] = df['review_scores_rating_normalized'] * df['number_of_reviews'] / df['number_of_reviews'].sum()
+    mean_normalized_rating = df['normalized_rating'].mean()
+    df['normalized_rating'].fillna(mean_normalized_rating, inplace=True)
+    # df = normalize_left_skewed(df, 'bedrooms')
+    # df = normalize_left_skewed(df, 'beds')
+    columns = ['accommodates', 'beds', 'bedrooms',
+               'bathrooms', 'host_response_rate', 'normalized_rating']
 
-    return df
+    return df[columns]
 
+
+# columns = ['accommodates', 'beds', 'bedrooms', 'bathrooms', 'host_response_rate', 'normalized_rating']
 
 """
 How to run the code: 

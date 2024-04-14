@@ -18,6 +18,7 @@ def cyclical_encode_dates(df):
     """
     date_columns = ['first_review', 'host_since', 'last_review']
     current_date = pd.to_datetime("today")
+    df = df[date_columns]
     
     for col in date_columns:
         missing_count = df[col].isna().sum()
@@ -32,6 +33,8 @@ def cyclical_encode_dates(df):
 
         df[col + '_days_since'].fillna(mean_days_since, inplace=True)
 
+
+    df.drop(columns=['first_review', 'host_since', 'last_review'], inplace=True)
 
     return df
 
