@@ -9,7 +9,7 @@ def one_hot_encode_categorical(df):
     df_dropped = df.dropna(subset=categorical_group)
 
     # Setting up the OneHotEncoder
-    encoder = OneHotEncoder()
+    encoder = OneHotEncoder(dtype=bool)
     transformer = ColumnTransformer([('one_hot_encoder', encoder, categorical_group)], remainder='passthrough')
     
     # Applying one-hot encoding
