@@ -17,3 +17,4 @@ def one_hot_encode_categorical(df):
     encoded_array = transformer.fit_transform(df)
     encoded_df = pd.DataFrame(encoded_array, columns=transformer.get_feature_names_out())
     return encoded_df
+
