@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bc2dd9d2-39aa-44ec-9071-2bfccbaf313c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/categorical.py" beforeDir="false" afterPath="$PROJECT_DIR$/categorical.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
