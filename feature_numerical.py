@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 # Observations
 # Some numerical columns have string entries
@@ -43,6 +44,14 @@ def convert_column_types(df):
     bathroom_mode = df['bathrooms'].mode().iloc[0]
     print("mode of bathroom: ", df['bathrooms'].mode().iloc[0])
     df['bathrooms'].fillna(bathroom_mode, inplace=True)
+    df['beds_per_bedroom'] = df['beds'] / (df['bedrooms'] + 1)
+    beds_per_bedroom_mode = df['beds_per_bedroom'].mode().iloc[0]
+    df['beds_per_bedroom'].fillna(beds_per_bedroom_mode, inplace=True)
+
+    df['bed_and_bathrooms'] = df['bedrooms'] + df['bathrooms']
+    scaler = StandardScaler()
+    df['bed_and_bathrooms'] = scaler.fit_transform(
+        df['bed_and_bathrooms'].to_numpy().reshape(-1, 1))
     
     return df
 
@@ -87,7 +96,7 @@ def process_numerical_columns(df):
     df['normalized_rating'].fillna(mean_normalized_rating, inplace=True)
     # df = normalize_left_skewed(df, 'bedrooms')
     # df = normalize_left_skewed(df, 'beds')
-    columns = ['accommodates', 'beds', 'bedrooms',
+    columns = ['accommodates', 'beds_per_bedroom', 'beds', 'bedrooms', 'bed_and_bathrooms',
                'bathrooms', 'host_response_rate', 'normalized_rating']
 
     return df[columns]

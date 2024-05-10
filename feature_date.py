@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 
 def cyclical_encode_dates(df):
@@ -35,6 +36,10 @@ def cyclical_encode_dates(df):
 
 
     df.drop(columns=['first_review', 'host_since', 'last_review'], inplace=True)
+
+    scaler = StandardScaler()
+    df[['first_review_days_since', 'host_since_days_since', 'last_review_days_since']
+       ] = scaler.fit_transform(df)
 
     return df
 
