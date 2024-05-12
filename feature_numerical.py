@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
+from na_filling_utils import linear_reg_fillna
+
 # Observations
 # Some numerical columns have string entries
 
@@ -27,26 +29,32 @@ def remove_outliers(df, column_name):
     
     return df_filtered
 
-def convert_column_types(df):
+def fill_nas(df):
     df = df.copy()
-    mean_value = df['bedrooms'].mean() # use floorspace to predict bedrooms?
-    df['bedrooms'] = df['bedrooms'].fillna(mean_value)
-    df['bedrooms'] = df['bedrooms'].astype(int)
     
-    mean_value = df['beds'].mean()  # use bed_type to predict beds?
-    df['beds'] = df['beds'].fillna(mean_value)
-    df['beds'] = df['beds'].astype(int)
+    # bedrooms is filled with linear reg using 'property_type', 'room_type', 'accommodates', 'bed_type', 'beds'
+    bedrooms_nonna = linear_reg_fillna(df, ['property_type', 'room_type', 'accommodates', 'bed_type', 'beds'], 'bedrooms')
     
+    # beds is filled with linear reg using 'property_type', 'room_type', 'accommodates', 'bed_type', 'bedrooms'
+    beds_nonna = linear_reg_fillna(df, ['property_type', 'room_type', 'accommodates', 'bed_type', 'bedrooms'], 'beds')
+    
+    # bathrooms is filled with linear reg using property_type and room_type
+    bathrooms_nonna = linear_reg_fillna(df, ['property_type', 'room_type'], 'bathrooms')
+    
+    # review_scores_rating is filled with linear reg using 'property_type', 'room_type', 'cleaning_fee', 'instant_bookable'
+    review_scores_rating_nonna = linear_reg_fillna(df, ['property_type', 'room_type', 'cleaning_fee', 'instant_bookable'], 'review_scores_rating')
+    
+    # host_response_rate is filled using mean
     df['host_response_rate'] = df['host_response_rate'].str.replace('%', '').astype(float)
     host_response_rate_mean = df['host_response_rate'].mean()
     df['host_response_rate'].fillna(host_response_rate_mean, inplace=True)
-
-    bathroom_mode = df['bathrooms'].mode().iloc[0]
-    print("mode of bathroom: ", df['bathrooms'].mode().iloc[0])
-    df['bathrooms'].fillna(bathroom_mode, inplace=True)
+    
+    df['bedrooms'] = bedrooms_nonna
+    df['beds'] = beds_nonna
+    df['bathrooms'] = bathrooms_nonna
+    df['review_scores_rating'] = review_scores_rating_nonna
+    
     df['beds_per_bedroom'] = df['beds'] / (df['bedrooms'] + 1)
-    beds_per_bedroom_mode = df['beds_per_bedroom'].mode().iloc[0]
-    df['beds_per_bedroom'].fillna(beds_per_bedroom_mode, inplace=True)
 
     df['bed_and_bathrooms'] = df['bedrooms'] + df['bathrooms']
     scaler = StandardScaler()
@@ -66,7 +74,7 @@ def normalize_left_skewed(df, column_name):
     return df
 
 def normalize_right_skewed(df, column_name):
-    df[column_name + "_normalized"] = min_max_normalize(np.log(df[column_name] + 1))
+    df[column_name + "_normalized"] = min_max_normalize(df[column_name].apply(lambda x: np.log(x + 1)))
     return df
         
 
@@ -74,35 +82,44 @@ def process_numerical_columns(df):
     """
     Processes the numerical columns of Airbnb listing data.
     """
-    df = convert_column_types(df)
-
-    # Step 1: Remove outliers
+    df = fill_nas(df)
     
     # accommodates, bathrooms, bedrooms and beds are skewed
     # they are correlated so removing outliers from one is suffiicent
     # df = remove_outliers(df, 'accommodates')
-
-    # Step 2: Handle missing values (tbc)
     
     
-    # Step 3: Normalize
+    #  Normalize
     # df = normalize_left_skewed(df, 'accommodates')
     # df = normalize_left_skewed(df, 'bathrooms')
-    df = normalize_right_skewed(df, 'host_response_rate')
+    # df = normalize_right_skewed(df, 'host_response_rate')
     # df = normalize_left_skewed(df, 'number_of_reviews')
+    # df = normalize_right_skewed(df, 'review_scores_rating')
+    
+    
+    scaler = StandardScaler()
+    df['host_response_rate_normalized'] = scaler.fit_transform(
+        df['host_response_rate'].to_numpy().reshape(-1, 1))
+    
     df = normalize_right_skewed(df, 'review_scores_rating')
-    df['normalized_rating'] = df['review_scores_rating_normalized'] * df['number_of_reviews'] / df['number_of_reviews'].sum()
-    mean_normalized_rating = df['normalized_rating'].mean()
-    df['normalized_rating'].fillna(mean_normalized_rating, inplace=True)
+    # df['review_scores_rating_normalized'] = scaler.fit_transform(
+    #     df['review_scores_rating'].to_numpy().reshape(-1, 1))
+
+    # df = normalize_right_skewed(df, 'review_scores_rating')
+    
+    # print("df['review_scores_rating_normalized'].isna().sum()", df['review_scores_rating_normalized'].isna().sum())
+
+    # mean_normalized_rating = df['normalized_rating'].mean()
+    # df['normalized_rating'].fillna(mean_normalized_rating, inplace=True)
     # df = normalize_left_skewed(df, 'bedrooms')
     # df = normalize_left_skewed(df, 'beds')
-    columns = ['accommodates', 'beds_per_bedroom', 'beds', 'bedrooms', 'bed_and_bathrooms',
-               'bathrooms', 'host_response_rate', 'normalized_rating']
+    columns = ['accommodates', 'number_of_reviews',
+               'beds_per_bedroom', 'beds', 'bedrooms', 'bed_and_bathrooms', 'bathrooms', 
+               'host_response_rate', 'host_response_rate_normalized',
+               'review_scores_rating', 'review_scores_rating_normalized']
 
     return df[columns]
 
-
-# columns = ['accommodates', 'beds', 'bedrooms', 'bathrooms', 'host_response_rate', 'normalized_rating']
 
 """
 How to run the code: 
