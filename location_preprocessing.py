@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import prince
 import matplotlib.pyplot as plt
@@ -39,15 +40,20 @@ def get_locations_features(df):
 
     coordinates = famd.row_coordinates(location_df)
 
+    # Factorize city names and retrieve unique city names and their codes
+    codes, unique = pd.factorize(location_df['city'])
+    colors = plt.cm.viridis(np.linspace(0, 1, len(unique))
+                            )  # Generate a color array
 
-    # Assuming 'city' is a column in location_df you want to use for color labels
     fig, ax = plt.subplots(figsize=(8, 6))
-    scatter = ax.scatter(coordinates[0], coordinates[1],
-                        c=location_df['city'].factorize()[0], cmap='viridis')
+    for i, city in enumerate(unique):
+        # Filter data for each city and plot
+        ix = np.where(codes == i)
+        ax.scatter(coordinates.iloc[ix][0], coordinates.iloc[ix]
+                [1], color=colors[i], label=city)
 
-    # Create a colorbar with the city names
-    legend1 = ax.legend(*scatter.legend_elements(), title="Cities")
-    ax.add_artist(legend1)
+    # Create a legend with city names
+    ax.legend(title="Cities")
 
     plt.xlabel('Component 1')
     plt.ylabel('Component 2')
