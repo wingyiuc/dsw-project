@@ -74,7 +74,7 @@ def normalize_left_skewed(df, column_name):
     return df
 
 def normalize_right_skewed(df, column_name):
-    df[column_name + "_normalized"] = min_max_normalize(np.log(df[column_name] + 1))
+    df[column_name + "_normalized"] = min_max_normalize(df[column_name].apply(lambda x: np.log(x + 1)))
     return df
         
 
