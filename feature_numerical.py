@@ -49,8 +49,8 @@ def fill_nas(df):
     host_response_rate_mean = df['host_response_rate'].mean()
     df['host_response_rate'].fillna(host_response_rate_mean, inplace=True)
     
-    df['bedrooms'] = bedrooms_nonna.astype(int)
-    df['beds'] = beds_nonna.astype(int)
+    df['bedrooms'] = bedrooms_nonna
+    df['beds'] = beds_nonna
     df['bathrooms'] = bathrooms_nonna
     df['review_scores_rating'] = review_scores_rating_nonna
     
@@ -92,16 +92,29 @@ def process_numerical_columns(df):
     #  Normalize
     # df = normalize_left_skewed(df, 'accommodates')
     # df = normalize_left_skewed(df, 'bathrooms')
-    df = normalize_right_skewed(df, 'host_response_rate')
+    # df = normalize_right_skewed(df, 'host_response_rate')
     # df = normalize_left_skewed(df, 'number_of_reviews')
+    # df = normalize_right_skewed(df, 'review_scores_rating')
+    
+    
+    scaler = StandardScaler()
+    df['host_response_rate_normalized'] = scaler.fit_transform(
+        df['host_response_rate'].to_numpy().reshape(-1, 1))
+    
+
+    scaler = StandardScaler()
     df = normalize_right_skewed(df, 'review_scores_rating')
+    print("bye", df['review_scores_rating_normalized'].head())
+    
     df['normalized_rating'] = df['review_scores_rating_normalized'] * df['number_of_reviews'] / df['number_of_reviews'].sum()
-    mean_normalized_rating = df['normalized_rating'].mean()
-    df['normalized_rating'].fillna(mean_normalized_rating, inplace=True)
+
+    # mean_normalized_rating = df['normalized_rating'].mean()
+    # df['normalized_rating'].fillna(mean_normalized_rating, inplace=True)
     # df = normalize_left_skewed(df, 'bedrooms')
     # df = normalize_left_skewed(df, 'beds')
     columns = ['accommodates', 'beds_per_bedroom', 'beds', 'bedrooms', 'bed_and_bathrooms',
-               'bathrooms', 'host_response_rate', 'normalized_rating']
+               'bathrooms', 'host_response_rate', 'host_response_rate_normalized',
+               'normalized_rating', 'review_scores_rating', 'number_of_reviews', 'review_scores_rating_normalized']
 
     return df[columns]
 

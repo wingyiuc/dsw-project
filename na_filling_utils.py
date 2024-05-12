@@ -73,5 +73,5 @@ def linear_reg_fillna(df, X_columns, y_column):
     
     y_pred = np.where(X.isna().any(axis=1), y_train.mean(), y_pred)
     
-    return pd.Series(np.where(df[y_column].isna(), y_pred, df[y_column]))
+    return np.where(df[y_column].isna(), y_pred, df[y_column])
     
