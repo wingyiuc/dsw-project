@@ -39,11 +39,7 @@ def encode_df(df, X_columns, y_column):
             X.append(df[column])
             
     y = df[y_column]
-    if y_column == "host_has_profile_pic":
-        y = df[y_column].replace({'t': 1, 'f': 0})
-    elif y_column == "host_identity_verified":
-        y = df[y_column].replace({'t': 1, 'f': 0})
-    elif y_column in DATE_COLUMNS:
+    if y_column in DATE_COLUMNS:
         process_date(df, y_column)
         y = df[y_column]
 

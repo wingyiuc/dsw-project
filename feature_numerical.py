@@ -101,25 +101,25 @@ def process_numerical_columns(df):
     df['host_response_rate_normalized'] = scaler.fit_transform(
         df['host_response_rate'].to_numpy().reshape(-1, 1))
     
-
-    scaler = StandardScaler()
     df = normalize_right_skewed(df, 'review_scores_rating')
-    print("bye", df['review_scores_rating_normalized'].head())
+    # df['review_scores_rating_normalized'] = scaler.fit_transform(
+    #     df['review_scores_rating'].to_numpy().reshape(-1, 1))
+
+    # df = normalize_right_skewed(df, 'review_scores_rating')
     
-    df['normalized_rating'] = df['review_scores_rating_normalized'] * df['number_of_reviews'] / df['number_of_reviews'].sum()
+    # print("df['review_scores_rating_normalized'].isna().sum()", df['review_scores_rating_normalized'].isna().sum())
 
     # mean_normalized_rating = df['normalized_rating'].mean()
     # df['normalized_rating'].fillna(mean_normalized_rating, inplace=True)
     # df = normalize_left_skewed(df, 'bedrooms')
     # df = normalize_left_skewed(df, 'beds')
-    columns = ['accommodates', 'beds_per_bedroom', 'beds', 'bedrooms', 'bed_and_bathrooms',
-               'bathrooms', 'host_response_rate', 'host_response_rate_normalized',
-               'normalized_rating', 'review_scores_rating', 'number_of_reviews', 'review_scores_rating_normalized']
+    columns = ['accommodates', 'number_of_reviews',
+               'beds_per_bedroom', 'beds', 'bedrooms', 'bed_and_bathrooms', 'bathrooms', 
+               'host_response_rate', 'host_response_rate_normalized',
+               'review_scores_rating', 'review_scores_rating_normalized']
 
     return df[columns]
 
-
-# columns = ['accommodates', 'beds', 'bedrooms', 'bathrooms', 'host_response_rate', 'normalized_rating']
 
 """
 How to run the code: 
